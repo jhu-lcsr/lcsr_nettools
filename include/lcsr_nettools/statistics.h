@@ -50,6 +50,7 @@ namespace lcsr_nettools {
     
     //@}
 
+  private: 
     class MessageSample {
     public:
       uint32_t seq;
@@ -61,9 +62,6 @@ namespace lcsr_nettools {
       return (a.recv_time - a.send_time) < (a.recv_time - a.send_time);
     }
 
-
-  private: 
-    
     ros::Duration latency_buffer_duration_;
 
     std::list<MessageSample> latencies_;
