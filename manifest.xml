@@ -1,0 +1,17 @@
+<package>
+  <description brief="lcsr_nettools">
+
+     lcsr_nettools
+
+  </description>
+  <author>Jonathan Bohren</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lcsr_nettools</url>
+
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
