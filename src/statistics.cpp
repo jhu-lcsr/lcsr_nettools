@@ -1,6 +1,7 @@
 
 #include <lcsr_nettools/statistics.h>
 #include <algorithm>
+#include <cmath>
 
 using namespace lcsr_nettools;
 
@@ -34,6 +35,7 @@ void Statistics::sample(const std_msgs::Header &header,
 
   // Compute running total latency, min latency, max latency
   total_latency_ += latency;
+  total_latency_squares_ += ros::Duration(std::pow(latency.toSec(),2));
   min_latency_ = (latency < min_latency_)?(latency):(min_latency_);
   max_latency_ = (latency > max_latency_)?(latency):(max_latency_);
 
@@ -81,7 +83,7 @@ double Statistics::packet_loss(const bool recent) const
   return 0.0;
 }
 
-ros::Duration Statistics::min_latency(const bool recent) const
+ros::Duration Statistics::latency_min(const bool recent) const
 {
   if(recent && latency_buffer_duration_ > ros::Duration(0.0)) {
     if(latencies_.size() > 0) {
@@ -95,7 +97,7 @@ ros::Duration Statistics::min_latency(const bool recent) const
   return ros::Duration(0.0);
 }
 
-ros::Duration Statistics::max_latency(const bool recent) const
+ros::Duration Statistics::latency_max(const bool recent) const
 {
   if(recent && latency_buffer_duration_ > ros::Duration(0.0)) {
     if(latencies_.size() > 0) {
@@ -109,17 +111,19 @@ ros::Duration Statistics::max_latency(const bool recent) const
   return ros::Duration(0.0);
 }
 
-ros::Duration Statistics::average_latency(const bool recent) const 
+ros::Duration Statistics::latency_average(const bool recent) const 
 {
   if(recent && latency_buffer_duration_ > ros::Duration(0.0)) {
-    ros::Duration total_recent_latency = ros::Duration(0);
-    for(std::list<Statistics::MessageSample>::const_iterator it = latencies_.begin();
-        it != latencies_.end();
-        ++it)
-    {
-      total_recent_latency += (it->recv_time - it->send_time);
+    if(latencies_.size() > 0) {
+      ros::Duration total_recent_latency = ros::Duration(0);
+      for(std::list<Statistics::MessageSample>::const_iterator it = latencies_.begin();
+          it != latencies_.end();
+          ++it)
+      {
+        total_recent_latency += (it->recv_time - it->send_time);
+      }
+      return total_recent_latency * (1.0 / double(latencies_.size()));
     }
-    return total_recent_latency * (1.0 / double(latencies_.size()));
   } else {
     if(n_msgs_received_ > 0) {
       return total_latency_ * (1.0 / double(n_msgs_received_));
@@ -129,7 +133,29 @@ ros::Duration Statistics::average_latency(const bool recent) const
   return ros::Duration(0.0);
 }
 
-ros::Duration Statistics::latest_latency() const 
+ros::Duration Statistics::latency_variance(const bool recent) const
+{
+  if(recent && latency_buffer_duration_ > ros::Duration(0.0)) {
+    if(latencies_.size() > 0) {
+      double recent_latency_squares = 0.0;
+      for(std::list<Statistics::MessageSample>::const_iterator it = latencies_.begin();
+          it != latencies_.end();
+          ++it)
+      {
+        recent_latency_squares += std::pow((it->recv_time - it->send_time).toSec(), 2);
+      }
+      return ros::Duration(recent_latency_squares/double(latencies_.size())) - this->latency_average(recent);
+    }
+  } else {
+    if(n_msgs_received_ > 0) {
+      return (total_latency_squares_ * (1.0/double(n_msgs_received_))) - this->latency_average();
+    }
+  }
+
+  return ros::Duration(0.0);
+}
+
+ros::Duration Statistics::latency_latest() const 
 {
   return latest_sample_.recv_time - latest_sample_.send_time;
 }

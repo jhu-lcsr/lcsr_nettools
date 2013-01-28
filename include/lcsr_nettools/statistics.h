@@ -37,14 +37,16 @@ namespace lcsr_nettools {
     //! Get the packet loss
     double packet_loss(const bool recent=false) const;
     //! Get the minimum latency
-    ros::Duration min_latency(const bool recent=false) const;
+    ros::Duration latency_min(const bool recent=false) const;
     //! Get the maximum latency
-    ros::Duration max_latency(const bool recent=false) const;
+    ros::Duration latency_max(const bool recent=false) const;
     //! Get the average latency
-    ros::Duration average_latency(const bool recent=false) const;
+    ros::Duration latency_average(const bool recent=false) const;
+    //! Get the variance of the latency
+    ros::Duration latency_variance(const bool recent=false) const;
 
     //! Get the latency of the latest package
-    ros::Duration latest_latency() const;
+    ros::Duration latency_latest() const;
     
     //@}
 
@@ -72,6 +74,7 @@ namespace lcsr_nettools {
     size_t n_msgs_out_of_order_;
 
     ros::Duration total_latency_;
+    ros::Duration total_latency_squares_;
     ros::Duration min_latency_;
     ros::Duration max_latency_;
   };
