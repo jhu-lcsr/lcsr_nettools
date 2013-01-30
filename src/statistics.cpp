@@ -5,7 +5,9 @@
 
 using namespace lcsr_nettools;
 
-Statistics::Statistics(const ros::Duration latency_buffer_duration) :
+Statistics::Statistics(const std::string &topic_name,
+                       const ros::Duration &latency_buffer_duration) :
+  topic_name_(topic_name),
   latency_buffer_duration_(latency_buffer_duration),
   latencies_(),
   first_sample_(),
@@ -23,7 +25,7 @@ Statistics::~Statistics() {
 }
 
 void Statistics::sample(const std_msgs::Header &header,
-                   const ros::Time &sample_time)
+                        const ros::Time &sample_time)
 {
   // Check if this message is out of order
   if(header.seq < latencies_.back().seq) {

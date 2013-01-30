@@ -15,7 +15,8 @@ namespace lcsr_nettools {
   class Statistics {
   public:
     //! Default Constructor
-    Statistics(const ros::Duration latency_buffer_duration = ros::Duration(0));
+    Statistics(const std::string &topic_name,
+               const ros::Duration &latency_buffer_duration = ros::Duration(0));
 
     //! Destructor
     ~Statistics();
@@ -62,6 +63,7 @@ namespace lcsr_nettools {
       return (a.recv_time - a.send_time) < (a.recv_time - a.send_time);
     }
 
+    std::string topic_name_;
     ros::Duration latency_buffer_duration_;
 
     std::list<MessageSample> latencies_;
