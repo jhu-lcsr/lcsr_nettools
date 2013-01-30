@@ -1,0 +1,3 @@
+float64 msg_loss
+lcsr_nettools/StatisticsMeasurements latency
+lcsr_nettools/StatisticsMeasurements frequency

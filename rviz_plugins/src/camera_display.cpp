@@ -28,6 +28,7 @@
  */
 
 #include "camera_display.h"
+#include <lcsr_nettools/statistics.h>
 
 #include <rviz/visualization_manager.h>
 #include <rviz/render_panel.h>
@@ -88,6 +89,7 @@ CameraDisplay::CameraDisplay()
   , render_panel_( 0 )
   , force_render_(false)
   , panel_container_( 0 )
+  , msg_stats_(ros::NodeHandle(),"undefined", ros::Duration(30.0))
 {
 }
 
@@ -391,6 +393,11 @@ void CameraDisplay::setImagePosition(const std::string& image_position)
   causeRender();
 }
 
+void CameraDisplay::setStatisticsDuration( const double duration_secs)
+{
+  //TODO: update statistics sampling duration
+}
+
 void CameraDisplay::clear()
 {
   texture_.clear();
@@ -439,6 +446,9 @@ void CameraDisplay::update(float wall_dt, float ros_dt)
       alpha_ = old_alpha;
 
       force_render_ = false;
+
+      // Publish image statistics
+      msg_stats_.publish();
     }
   }
   catch (UnsupportedImageEncoding& e)
@@ -462,6 +472,8 @@ void CameraDisplay::updateCamera()
   {
     return;
   }
+
+  msg_stats_.sample(image->header);
 
   if (!validateFloats(*info))
   {

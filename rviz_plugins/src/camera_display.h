@@ -45,6 +45,8 @@
 #include <message_filters/subscriber.h>
 #include <tf/message_filter.h>
 
+#include <lcsr_nettools/statistics.h>
+
 namespace Ogre
 {
 class SceneNode;
@@ -88,6 +90,9 @@ public:
 
   const std::string& getImagePosition() { return image_position_; }
   void setImagePosition(const std::string& image_position);
+
+  const double getStatisticsDuration() { return msg_stats_.get_window_duration(); }
+  void setStatisticsDuration(const double duation_secs);
 
   float getZoom() { return zoom_; }
   void setZoom( float zoom );
@@ -166,6 +171,8 @@ protected:
   bool force_render_;
 
   rviz::PanelDockWidget* panel_container_;
+
+  lcsr_nettools::StatisticsTracker msg_stats_;
 };
 
 } // namespace rviz
