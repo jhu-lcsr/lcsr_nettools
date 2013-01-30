@@ -28,3 +28,5 @@ rosbuild_add_library(${PROJECT_NAME} src/statistics.cpp)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+add_subdirectory(rviz_plugins)

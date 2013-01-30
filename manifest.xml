@@ -11,7 +11,16 @@
 
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
+  <depend package="pluginlib"/>
+  <depend package="rviz"/>
+  <depend package="tf"/>
+  <depend package="sensor_msgs"/>
+  <depend package="ogre"/>
+  <depend package="message_filters"/>
 
+  <export>
+    <rviz plugin="${prefix}/rviz_plugins/plugin_description.xml"/>
+  </export>
 </package>
 
 
