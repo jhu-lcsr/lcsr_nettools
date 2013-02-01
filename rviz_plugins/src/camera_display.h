@@ -91,8 +91,8 @@ public:
   const std::string& getImagePosition() { return image_position_; }
   void setImagePosition(const std::string& image_position);
 
-  const double getStatisticsDuration() { return msg_stats_.get_window_duration(); }
-  void setStatisticsDuration(const double duation_secs);
+  const double getStatisticsTrackerDuration() { return stat_tracker_.get_window_duration(); }
+  void setStatisticsTrackerDuration(const double duation_secs);
 
   float getZoom() { return zoom_; }
   void setZoom( float zoom );
@@ -158,6 +158,7 @@ protected:
   rviz::EditEnumPropertyWPtr image_position_property_;
   rviz::FloatPropertyWPtr zoom_property_;
   rviz::IntPropertyWPtr queue_size_property_;
+  rviz::FloatPropertyWPtr stat_tracker_duration_property_;
 
   sensor_msgs::CameraInfo::ConstPtr current_caminfo_;
   boost::mutex caminfo_mutex_;
@@ -172,7 +173,7 @@ protected:
 
   rviz::PanelDockWidget* panel_container_;
 
-  lcsr_nettools::StatisticsTracker msg_stats_;
+  lcsr_nettools::StatisticsTracker stat_tracker_;
 };
 
 } // namespace rviz

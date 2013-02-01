@@ -22,7 +22,7 @@ StatisticsTracker::StatisticsTracker(ros::NodeHandle nh,
   n_msgs_out_of_order_(0),
   latency_(),
   frequency_(),
-  diagnostics_pub_(nh_.advertise<lcsr_nettools::TopicStatistics>(topic_name+"_statistics",10))
+  diagnostics_pub_(nh_.advertise<lcsr_nettools::TopicStatistics>("topic_statistics",10))
 {
 
 }
@@ -121,7 +121,7 @@ double StatisticsTracker::frequency_avg(const bool all_time) const
   } else {
     // Count the msgs received and the length of the sampling duration
     if(samples_.size() > 0) {
-      double sampling_duration = (ros::Time::now() - samples_.front().recv_time).toSec();
+      double sampling_duration = (samples_.back().recv_time - samples_.front().recv_time).toSec();
 
       if(sampling_duration > 0) {
         return double(samples_.size()) / sampling_duration;
@@ -268,6 +268,32 @@ double StatisticsTracker::latency_latest() const
   return (latest_sample_.recv_time - latest_sample_.send_time).toSec();
 }
 
+void StatisticsTracker::reset()
+{
+  latency_ = lcsr_nettools::StatisticsMeasurements();
+  frequency_ = lcsr_nettools::StatisticsMeasurements();
+  n_msgs_received_ = 0;
+  n_msgs_out_of_order_ = 0;
+  samples_.clear();
+}
+
+void StatisticsTracker::set_topic(const std::string topic_name)
+{
+  topic_name_ = topic_name;
+  this->reset();
+}
+
+std::string StatisticsTracker::get_topic() const
+{
+  return topic_name_;
+}
+
+void StatisticsTracker::set_window_duration(const ros::Duration sample_buffer_duration)
+{
+  sample_buffer_duration_ = sample_buffer_duration;
+  this->reset();
+}
+
 double StatisticsTracker::get_window_duration() const
 {
   return sample_buffer_duration_.toSec();
@@ -275,6 +301,14 @@ double StatisticsTracker::get_window_duration() const
 
 void StatisticsTracker::fill_measurement_msg(lcsr_nettools::TopicMeasurements &msg, const bool all_time) const
 {
+  if(all_time) {
+    msg.first_sample_time = first_sample_.recv_time;
+  } else {
+    msg.first_sample_time = samples_.back().recv_time;
+  }
+
+  msg.latest_sample_time = latest_sample_.recv_time;
+
   msg.msg_loss = this->msg_loss(all_time);
   msg.frequency.avg = this->frequency_avg(all_time);
   msg.frequency.std = this->frequency_std(all_time);
@@ -287,16 +321,21 @@ void StatisticsTracker::fill_measurement_msg(lcsr_nettools::TopicMeasurements &m
 }
 
 
-void StatisticsTracker::publish() const
+void StatisticsTracker::publish(bool throttle, double throttle_factor) const
 {
   static lcsr_nettools::TopicStatistics stat_msg;
+
+  // Don't publish if we're throttling and haven't passed the throttle timestep
+  if(throttle && (ros::Time::now() - stat_msg.header.stamp) >= (sample_buffer_duration_ * throttle_factor)) {
+    return;
+  }
 
   stat_msg.header.seq ++;
   stat_msg.header.stamp = ros::Time::now();
 
   stat_msg.topic_name = topic_name_;
 
-  stat_msg.sample_duration = sample_buffer_duration_;
+  stat_msg.recent_buffer_duration = sample_buffer_duration_;
 
   this->fill_measurement_msg(stat_msg.recent, false);
   this->fill_measurement_msg(stat_msg.all_time, true);

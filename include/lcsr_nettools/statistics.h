@@ -63,12 +63,31 @@ namespace lcsr_nettools {
     
     //! Get the latency of the latest package
     double latency_latest() const;
+
+    //! Reset all statistics
+    void reset();
     
+    //! Set the topic being monitored
+    void set_topic(const std::string topic_name);
+    //! Get the topic being monitored
+    std::string get_topic() const;
+    
+    //! Set the sampling window duration
+    void set_window_duration(const ros::Duration sample_buffer_duration);
     //! Get the sampling window duration
     double get_window_duration() const;
 
-    //! Fill and publish a ROS message 
-    void publish() const;
+    /** Fill and publish a ROS message 
+     *
+     * \arg \c throttle If \c throttle is set to \c true, then no
+     * matter how often this function is called, it will only
+     * publish at a period of \ref sample_buffer_duration_ * \c
+     * throttle_factor.
+     *
+     * \arg \c throttle_factor The factor by which the throttle
+     * period is scaled.
+     */
+    void publish(bool throttle=true, double throttle_factor=0.5) const;
 
   protected: 
     

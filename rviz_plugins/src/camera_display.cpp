@@ -89,7 +89,7 @@ CameraDisplay::CameraDisplay()
   , render_panel_( 0 )
   , force_render_(false)
   , panel_container_( 0 )
-  , msg_stats_(ros::NodeHandle(),"undefined", ros::Duration(30.0))
+  , stat_tracker_(ros::NodeHandle(),"", ros::Duration(30.0))
 {
 }
 
@@ -369,6 +369,8 @@ void CameraDisplay::setTopic( const std::string& topic )
   topic_ = topic;
   clear();
 
+  stat_tracker_.set_topic(topic);
+
   subscribe();
 
   propertyChanged(topic_property_);
@@ -393,9 +395,10 @@ void CameraDisplay::setImagePosition(const std::string& image_position)
   causeRender();
 }
 
-void CameraDisplay::setStatisticsDuration( const double duration_secs)
+void CameraDisplay::setStatisticsTrackerDuration( const double duration_secs)
 {
-  //TODO: update statistics sampling duration
+  stat_tracker_.set_window_duration(ros::Duration(duration_secs));
+  propertyChanged(stat_tracker_duration_property_);
 }
 
 void CameraDisplay::clear()
@@ -448,7 +451,7 @@ void CameraDisplay::update(float wall_dt, float ros_dt)
       force_render_ = false;
 
       // Publish image statistics
-      msg_stats_.publish();
+      stat_tracker_.publish();
     }
   }
   catch (UnsupportedImageEncoding& e)
@@ -473,7 +476,7 @@ void CameraDisplay::updateCamera()
     return;
   }
 
-  msg_stats_.sample(image->header);
+  stat_tracker_.sample(image->header);
 
   if (!validateFloats(*info))
   {
@@ -648,6 +651,12 @@ void CameraDisplay::createProperties()
                                                                          boost::bind( &CameraDisplay::setQueueSize, this, _1 ),
                                                                          parent_category_, this );
   setPropertyHelpText( queue_size_property_, "Advanced: set the size of the incoming message queue.  Increasing this is useful if your incoming TF data is delayed significantly from your camera data, but it can greatly increase memory usage if the messages are big." );
+
+  stat_tracker_duration_property_ = property_manager_->createProperty<FloatProperty>("Statistics Window Duration", property_prefix_,
+                                                                                     boost::bind(&CameraDisplay::getStatisticsTrackerDuration, this),
+                                                                                     boost::bind( &CameraDisplay::setStatisticsTrackerDuration, this, _1),
+                                                                                     parent_category_, this);
+  setPropertyHelpText(stat_tracker_duration_property_, "This is the size of the window over which topic message statistics are computed.");
 }
 
 void CameraDisplay::fixedFrameChanged()

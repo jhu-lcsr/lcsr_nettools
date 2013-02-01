@@ -1,3 +1,5 @@
 float64 msg_loss
+time first_sample_time
+time latest_sample_time
 lcsr_nettools/StatisticsMeasurements latency
 lcsr_nettools/StatisticsMeasurements frequency
