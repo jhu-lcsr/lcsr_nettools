@@ -91,6 +91,9 @@ public:
   const std::string& getImagePosition() { return image_position_; }
   void setImagePosition(const std::string& image_position);
 
+  const bool getStatisticsTrackerEnabled() { return stat_tracker_.is_enabled(); }
+  void setStatisticsTrackerEnabled(const bool enable);
+
   const double getStatisticsTrackerDuration() { return stat_tracker_.get_window_duration(); }
   void setStatisticsTrackerDuration(const double duation_secs);
 
@@ -158,6 +161,10 @@ protected:
   rviz::EditEnumPropertyWPtr image_position_property_;
   rviz::FloatPropertyWPtr zoom_property_;
   rviz::IntPropertyWPtr queue_size_property_;
+
+  // Statistics
+  rviz::CategoryPropertyWPtr stat_tracker_category_;
+  rviz::BoolPropertyWPtr stat_tracker_enabled_property_;
   rviz::FloatPropertyWPtr stat_tracker_duration_property_;
 
   sensor_msgs::CameraInfo::ConstPtr current_caminfo_;

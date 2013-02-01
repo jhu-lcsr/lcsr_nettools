@@ -395,6 +395,11 @@ void CameraDisplay::setImagePosition(const std::string& image_position)
   causeRender();
 }
 
+void CameraDisplay::setStatisticsTrackerEnabled( const bool enable)
+{
+  stat_tracker_.enable(enable);
+}
+
 void CameraDisplay::setStatisticsTrackerDuration( const double duration_secs)
 {
   stat_tracker_.set_window_duration(ros::Duration(duration_secs));
@@ -652,10 +657,21 @@ void CameraDisplay::createProperties()
                                                                          parent_category_, this );
   setPropertyHelpText( queue_size_property_, "Advanced: set the size of the incoming message queue.  Increasing this is useful if your incoming TF data is delayed significantly from your camera data, but it can greatly increase memory usage if the messages are big." );
 
-  stat_tracker_duration_property_ = property_manager_->createProperty<FloatProperty>("Statistics Window Duration", property_prefix_,
-                                                                                     boost::bind(&CameraDisplay::getStatisticsTrackerDuration, this),
-                                                                                     boost::bind( &CameraDisplay::setStatisticsTrackerDuration, this, _1),
-                                                                                     parent_category_, this);
+  // Statistics
+  stat_tracker_category_ = property_manager_->createCategory( "Topic Statistics", property_prefix_, parent_category_, this ); 
+
+  stat_tracker_enabled_property_ = 
+    property_manager_->createProperty<BoolProperty>("Enabled", "Topic Statistics",
+                                                     boost::bind(&CameraDisplay::getStatisticsTrackerEnabled, this),
+                                                     boost::bind( &CameraDisplay::setStatisticsTrackerEnabled, this, _1),
+                                                     stat_tracker_category_, this);
+  setPropertyHelpText(stat_tracker_enabled_property_, "If this is set, then statistics on the topic will be computed and published.");
+
+  stat_tracker_duration_property_ =
+    property_manager_->createProperty<FloatProperty>("Window Duration", "Topic Statistics",
+                                                     boost::bind(&CameraDisplay::getStatisticsTrackerDuration, this),
+                                                     boost::bind( &CameraDisplay::setStatisticsTrackerDuration, this, _1),
+                                                     stat_tracker_category_, this);
   setPropertyHelpText(stat_tracker_duration_property_, "This is the size of the window over which topic message statistics are computed.");
 }
 
@@ -668,6 +684,8 @@ void CameraDisplay::fixedFrameChanged()
 void CameraDisplay::reset()
 {
   Display::reset();
+
+  stat_tracker_.reset();
 
   clear();
 }

@@ -64,6 +64,11 @@ namespace lcsr_nettools {
     //! Get the latency of the latest package
     double latency_latest() const;
 
+    //! Enable or disable tracking statistics
+    void enable(const bool enable);
+    //! Check if statistics are being tracked / published
+    bool is_enabled() const;
+
     //! Reset all statistics
     void reset();
     
@@ -120,6 +125,7 @@ namespace lcsr_nettools {
     }
 
     ros::NodeHandle nh_;
+    bool enabled_;
     std::string topic_name_;
     ros::Duration sample_buffer_duration_;
 

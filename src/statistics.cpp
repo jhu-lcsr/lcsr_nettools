@@ -14,6 +14,7 @@ StatisticsTracker::StatisticsTracker(ros::NodeHandle nh,
                        const std::string topic_name,
                        const ros::Duration sample_buffer_duration) :
   nh_(nh),
+  enabled_(false),
   topic_name_(topic_name),
   sample_buffer_duration_(sample_buffer_duration),
   samples_(),
@@ -34,6 +35,10 @@ StatisticsTracker::~StatisticsTracker() {
 void StatisticsTracker::sample(const std_msgs::Header &header,
                         const ros::Time &sample_time)
 {
+  if(!enabled_) {
+    return;
+  }
+
   // Increment the sample counter
   n_msgs_received_++;
   
@@ -268,6 +273,16 @@ double StatisticsTracker::latency_latest() const
   return (latest_sample_.recv_time - latest_sample_.send_time).toSec();
 }
 
+void StatisticsTracker::enable(const bool enable)
+{
+  enabled_ = enable;
+}
+
+bool StatisticsTracker::is_enabled() const
+{
+  return enabled_;
+}
+
 void StatisticsTracker::reset()
 {
   latency_ = lcsr_nettools::StatisticsMeasurements();
@@ -324,6 +339,10 @@ void StatisticsTracker::fill_measurement_msg(lcsr_nettools::TopicMeasurements &m
 void StatisticsTracker::publish(bool throttle, double throttle_factor) const
 {
   static lcsr_nettools::TopicStatistics stat_msg;
+
+  if(!enabled_) {
+    return;
+  }
 
   // Don't publish if we're throttling and haven't passed the throttle timestep
   if(throttle && (ros::Time::now() - stat_msg.header.stamp) >= (sample_buffer_duration_ * throttle_factor)) {
