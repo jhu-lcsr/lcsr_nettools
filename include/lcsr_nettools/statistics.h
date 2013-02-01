@@ -15,12 +15,10 @@ namespace lcsr_nettools {
 
   class StatisticsTracker {
   public:
-    //! Default Constructor
     StatisticsTracker(ros::NodeHandle nh,
                const std::string topic_name,
                const ros::Duration latency_buffer_duration = ros::Duration(0));
 
-    //! Destructor
     ~StatisticsTracker();
 
     /** @name Sampling Functions
@@ -69,25 +67,35 @@ namespace lcsr_nettools {
     //! Get the sampling window duration
     double get_window_duration() const;
 
-    //! Fill a ROS message
-    void fill_measurement_msg(lcsr_nettools::TopicMeasurements &msg, const bool all_time=false) const;
-
     //! Fill and publish a ROS message 
     void publish() const;
 
-  private: 
+  protected: 
+    
+    //! Fill a ROS message
+    void fill_measurement_msg(lcsr_nettools::TopicMeasurements &msg, const bool all_time=false) const;
+
+  private:
+
     class MessageSample {
     public:
+      //! The squence id of this sample.
       uint32_t seq;
+      //! The time this sample was sent.
       ros::Time send_time;
+      //! The time this sample was received.
       ros::Time recv_time;
+      //! The time between the reception of the previous sample
+      //and this sample.
       double time_sep;
     };
 
+    //! Comparator for MessageSample latencies.
     static bool latency_cmp(const MessageSample& a, const MessageSample& b) {
       return (a.recv_time - a.send_time) < (b.recv_time - b.send_time);
     }
 
+    //! Comparator for MessageSample frequencies.
     static bool frequency_cmp(const MessageSample& a, const MessageSample& b) {
       return (1.0/a.time_sep) < (1.0/b.time_sep);
     }
