@@ -23,27 +23,30 @@ namespace lcsr_nettools {
     //! Destructor
     ~StatisticsTracker();
 
-    // @name Sempling Functions
-    // Description of group 2.
-    //@{
+    /** @name Sampling Functions
+     * These functions are used to sample data.
+     * @{ */
     
     //! Sample a message header
     void sample(const std_msgs::Header &header,
                 const ros::Time &time = ros::Time::now());
 
-    //@}
+    /* @} */
 
-    // @name Measurement Functions
-    // Description of group 2.
-    //@{
+    /** @name Measurement Functions
+     * All of these functions can either be called to
+     * process just the messages in the buffer (default, \c
+     * all_time=false), or for all data collected since the
+     * tracker has been reset (\c all_time=true).
+     * @{ */
     
     //! Get the msg loss
     double msg_loss(const bool all_time=false) const;
     
-    //! Get the average frequenzy
+    //! Get the average frequency
     double frequency_avg(const bool all_time=false) const;
-    //! Get the variance of the frequency
-    double frequency_var(const bool all_time=false) const;
+    //! Get the standard deviation of the frequency
+    double frequency_std(const bool all_time=false) const;
     //! Get the minimum frequency
     double frequency_min(const bool all_time=false) const;
     //! Get the maximum frequency
@@ -51,14 +54,14 @@ namespace lcsr_nettools {
 
     //! Get the average latency
     double latency_avg(const bool all_time=false) const;
-    //! Get the variance of the latency
-    double latency_var(const bool all_time=false) const;
+    //! Get the standard deviation of the latency
+    double latency_std(const bool all_time=false) const;
     //! Get the minimum latency
     double latency_min(const bool all_time=false) const;
     //! Get the maximum latency
     double latency_max(const bool all_time=false) const;
 
-    //@}
+    /* @} */
     
     //! Get the latency of the latest package
     double latency_latest() const;
@@ -100,15 +103,8 @@ namespace lcsr_nettools {
     size_t n_msgs_received_;
     size_t n_msgs_out_of_order_;
 
-    double latency_avg_;
-    double latency_var_;
-    double latency_min_;
-    double latency_max_;
-
-    double frequency_avg_;
-    double frequency_var_;
-    double frequency_min_;
-    double frequency_max_;
+    lcsr_nettools::StatisticsMeasurements latency_;
+    lcsr_nettools::StatisticsMeasurements frequency_;
 
     ros::Publisher diagnostics_pub_;
   };

@@ -20,14 +20,8 @@ StatisticsTracker::StatisticsTracker(ros::NodeHandle nh,
   first_sample_(),
   n_msgs_received_(0),
   n_msgs_out_of_order_(0),
-  latency_avg_(0.0),
-  latency_var_(0.0),
-  latency_min_(0.0),
-  latency_max_(0.0),
-  frequency_avg_(0.0),
-  frequency_var_(0.0),
-  frequency_min_(0.0),
-  frequency_max_(0.0),
+  latency_(),
+  frequency_(),
   diagnostics_pub_(nh_.advertise<lcsr_nettools::TopicStatistics>(topic_name+"_statistics",10))
 {
 
@@ -50,23 +44,23 @@ void StatisticsTracker::sample(const std_msgs::Header &header,
 
   // Compute the latency
   double latency = (sample_time - header.stamp).toSec();
-  double latency_avg_last = latency_avg_;
+  double latency_avg_last = latency_.avg;
   // Compute running total latency, min latency, max latency
-  latency_avg_ += (latency-latency_avg_)/double(n_msgs_received_);
-  latency_var_ = std::sqrt(((n_msgs_received_ - 1) * std::pow(latency_var_,2)
-                            + (latency - latency_avg_) * (latency - latency_avg_last)) / n_msgs_received_);
-  latency_min_ = (latency < latency_min_)?(latency):(latency_min_);
-  latency_max_ = (latency > latency_max_)?(latency):(latency_max_);
+  latency_.avg += (latency-latency_.avg)/double(n_msgs_received_);
+  latency_.std = std::sqrt(((n_msgs_received_ - 1) * std::pow(latency_.std,2)
+                            + (latency - latency_.avg) * (latency - latency_avg_last)) / n_msgs_received_);
+  latency_.min = (latency < latency_.min)?(latency):(latency_.min);
+  latency_.max = (latency > latency_.max)?(latency):(latency_.max);
 
   // Compute the frequency of this 
   double frequency = (n_msgs_received_ < 2) ? (0.0) : (1.0 / (sample_time - latest_sample_.recv_time).toSec());
-  double frequency_avg_last = frequency_avg_;
+  double frequency_avg_last = frequency_.avg;
   // Compute running average frequency, min frequency, max frquency
-  frequency_avg_ += (frequency-frequency_avg_)/double(n_msgs_received_);
-  frequency_var_ = std::sqrt(((n_msgs_received_ - 1) * std::pow(frequency_var_,2)
-                              + (frequency - frequency_avg_) * (frequency - frequency_avg_last)) / n_msgs_received_);
-  frequency_min_ = (frequency < frequency_min_)?(frequency):(frequency_min_);
-  frequency_max_ = (frequency > frequency_max_)?(frequency):(frequency_max_);
+  frequency_.avg += (frequency-frequency_.avg)/double(n_msgs_received_);
+  frequency_.std = std::sqrt(((n_msgs_received_ - 1) * std::pow(frequency_.std,2)
+                              + (frequency - frequency_.avg) * (frequency - frequency_avg_last)) / n_msgs_received_);
+  frequency_.min = (frequency < frequency_.min)?(frequency):(frequency_.min);
+  frequency_.max = (frequency > frequency_.max)?(frequency):(frequency_.max);
 
   // Store this sample
   StatisticsTracker::MessageSample msg_sample = {
@@ -80,11 +74,11 @@ void StatisticsTracker::sample(const std_msgs::Header &header,
   // Store the first sample, initialize the latency bounds
   if(n_msgs_received_ == 1) {
     first_sample_ = msg_sample;
-    latency_min_ = latency;
-    latency_max_ = latency;
+    latency_.min = latency;
+    latency_.max = latency;
   } else if(n_msgs_received_ == 2) {
-    frequency_min_ = frequency;
-    frequency_max_ = frequency;
+    frequency_.min = frequency;
+    frequency_.max = frequency;
   }
 
   // Check if we have an unlimited latency buffer
@@ -123,7 +117,7 @@ double StatisticsTracker::frequency_avg(const bool all_time) const
 {
   // Return the running frequency average
   if(all_time || sample_buffer_duration_ == ros::Duration(0.0)) {
-    return frequency_avg_;
+    return frequency_.avg;
   } else {
     // Count the msgs received and the length of the sampling duration
     if(samples_.size() > 0) {
@@ -138,10 +132,10 @@ double StatisticsTracker::frequency_avg(const bool all_time) const
   return std::numeric_limits<double>::quiet_NaN();
 }
 
-double StatisticsTracker::frequency_var(const bool all_time) const
+double StatisticsTracker::frequency_std(const bool all_time) const
 {
   if(all_time && sample_buffer_duration_ > ros::Duration(0.0)) {
-    return frequency_var_;
+    return frequency_.std;
   } else {
     if(samples_.size() > 1) {
       double recent_frequency_squares = 0.0;
@@ -164,7 +158,7 @@ double StatisticsTracker::frequency_var(const bool all_time) const
 double StatisticsTracker::frequency_min(const bool all_time) const
 {
   if(all_time || sample_buffer_duration_ == ros::Duration(0.0)) {
-    return frequency_min_;
+    return frequency_.min;
   } else {
     if(samples_.size() > 0) {
       StatisticsTracker::MessageSample min_sample =
@@ -181,7 +175,7 @@ double StatisticsTracker::frequency_min(const bool all_time) const
 double StatisticsTracker::frequency_max(const bool all_time) const
 {
   if(all_time || sample_buffer_duration_ == ros::Duration(0.0)) {
-    return frequency_max_;
+    return frequency_.max;
   } else {
     if(samples_.size() > 0) {
       StatisticsTracker::MessageSample max_sample =
@@ -198,7 +192,7 @@ double StatisticsTracker::frequency_max(const bool all_time) const
 double StatisticsTracker::latency_avg(const bool all_time) const 
 {
   if(all_time && sample_buffer_duration_ > ros::Duration(0.0)) {
-    return latency_avg_;
+    return latency_.avg;
   } else {
     if(samples_.size() > 0) {
       ros::Duration total_recent_latency = ros::Duration(0.0);
@@ -214,10 +208,10 @@ double StatisticsTracker::latency_avg(const bool all_time) const
   return std::numeric_limits<double>::quiet_NaN();
 }
 
-double StatisticsTracker::latency_var(const bool all_time) const
+double StatisticsTracker::latency_std(const bool all_time) const
 {
   if(all_time && sample_buffer_duration_ > ros::Duration(0.0)) {
-    return latency_var_;
+    return latency_.std;
   } else {
     if(samples_.size() > 0) {
       double recent_latency_squares = 0.0;
@@ -237,7 +231,7 @@ double StatisticsTracker::latency_var(const bool all_time) const
 double StatisticsTracker::latency_min(const bool all_time) const
 {
   if(all_time || sample_buffer_duration_ == ros::Duration(0.0)) {
-    return latency_min_;
+    return latency_.min;
   } else {
     if(samples_.size() > 0) {
       StatisticsTracker::MessageSample min_sample =
@@ -255,7 +249,7 @@ double StatisticsTracker::latency_min(const bool all_time) const
 double StatisticsTracker::latency_max(const bool all_time) const
 {
   if(all_time || sample_buffer_duration_ == ros::Duration(0.0)) {
-    return latency_max_;
+    return latency_.max;
   } else {
     if(samples_.size() > 0) {
       StatisticsTracker::MessageSample max_sample =
@@ -283,11 +277,11 @@ void StatisticsTracker::fill_measurement_msg(lcsr_nettools::TopicMeasurements &m
 {
   msg.msg_loss = this->msg_loss(all_time);
   msg.frequency.avg = this->frequency_avg(all_time);
-  msg.frequency.var = this->frequency_var(all_time);
+  msg.frequency.std = this->frequency_std(all_time);
   msg.frequency.min = this->frequency_min(all_time);
   msg.frequency.max = this->frequency_max(all_time);
   msg.latency.avg = this->latency_avg(all_time);
-  msg.latency.var = this->latency_var(all_time);
+  msg.latency.std = this->latency_std(all_time);
   msg.latency.min = this->latency_min(all_time);
   msg.latency.max = this->latency_max(all_time);
 }

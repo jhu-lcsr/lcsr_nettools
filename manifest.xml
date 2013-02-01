@@ -20,6 +20,7 @@
 
   <export>
     <rviz plugin="${prefix}/rviz_plugins/plugin_description.xml"/>
+    <rosdoc config="rosdoc.yaml"/>
   </export>
 </package>
 
