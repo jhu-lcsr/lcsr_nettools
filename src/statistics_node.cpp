@@ -16,7 +16,7 @@ void sample_header(const lcsr_nettools::HeaderSample::ConstPtr &header,
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "statistics_node");
-  ros::NodeHandle nh("");
+  ros::NodeHandle nh("~");
 
   // Get topic name
   std::string topic_name = "undefined";
