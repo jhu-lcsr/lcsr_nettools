@@ -33,7 +33,7 @@ StatisticsTracker::~StatisticsTracker() {
 }
 
 void StatisticsTracker::sample(const std_msgs::Header &header,
-                        const ros::Time &sample_time)
+                               const ros::Time &recv_time)
 {
   if(!enabled_) {
     return;
@@ -48,7 +48,7 @@ void StatisticsTracker::sample(const std_msgs::Header &header,
   }
 
   // Compute the latency
-  double latency = (sample_time - header.stamp).toSec();
+  double latency = (recv_time - header.stamp).toSec();
   double latency_avg_last = latency_.avg;
   // Compute running total latency, min latency, max latency
   latency_.avg += (latency-latency_.avg)/double(n_msgs_received_);
@@ -58,7 +58,7 @@ void StatisticsTracker::sample(const std_msgs::Header &header,
   latency_.max = (latency > latency_.max)?(latency):(latency_.max);
 
   // Compute the frequency of this 
-  double frequency = (n_msgs_received_ < 2) ? (0.0) : (1.0 / (sample_time - latest_sample_.recv_time).toSec());
+  double frequency = (n_msgs_received_ < 2) ? (0.0) : (1.0 / (recv_time - latest_sample_.recv_time).toSec());
   double frequency_avg_last = frequency_.avg;
   // Compute running average frequency, min frequency, max frquency
   frequency_.avg += (frequency-frequency_.avg)/double(n_msgs_received_);
@@ -71,8 +71,8 @@ void StatisticsTracker::sample(const std_msgs::Header &header,
   StatisticsTracker::MessageSample msg_sample = {
     header.seq,
     header.stamp,
-    sample_time,
-    (sample_time-latest_sample_.recv_time).toSec()};
+    recv_time,
+    (recv_time-latest_sample_.recv_time)};
   samples_.push_back(msg_sample);
   latest_sample_ = msg_sample;
   
@@ -89,7 +89,7 @@ void StatisticsTracker::sample(const std_msgs::Header &header,
   // Check if we have an unlimited latency buffer
   if(sample_buffer_duration_ > ros::Duration(0.0)) {
     // Free samples outside of the window
-    while(samples_.front().send_time < sample_time - sample_buffer_duration_) {
+    while(samples_.front().send_time < recv_time - sample_buffer_duration_) {
       samples_.pop_front();
     }
   }
@@ -150,7 +150,7 @@ double StatisticsTracker::frequency_std(const bool all_time) const
           sample != samples_.end();
           ++sample)
       {
-        recent_frequency_squares += std::pow(1.0/sample->time_sep, 2);
+        recent_frequency_squares += std::pow(1.0/sample->time_sep.toSec(), 2);
       }
 
       return std::sqrt(recent_frequency_squares/double(samples_.size()) - std::pow(recent_frequency_avg,2));
@@ -317,12 +317,12 @@ double StatisticsTracker::get_window_duration() const
 void StatisticsTracker::fill_measurement_msg(lcsr_nettools::TopicMeasurements &msg, const bool all_time) const
 {
   if(all_time) {
-    msg.first_sample_time = first_sample_.recv_time;
+    msg.first_recv_time = first_sample_.recv_time;
   } else {
-    msg.first_sample_time = samples_.back().recv_time;
+    msg.first_recv_time = samples_.back().recv_time;
   }
 
-  msg.latest_sample_time = latest_sample_.recv_time;
+  msg.latest_recv_time = latest_sample_.recv_time;
 
   msg.msg_loss = this->msg_loss(all_time);
   msg.frequency.avg = this->frequency_avg(all_time);

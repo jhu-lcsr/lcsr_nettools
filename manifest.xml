@@ -17,6 +17,7 @@
   <depend package="sensor_msgs"/>
   <depend package="ogre"/>
   <depend package="message_filters"/>
+  <depend package="topic_tools"/>
 
   <export>
     <rviz plugin="${prefix}/rviz_plugins/plugin_description.xml"/>

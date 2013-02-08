@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Header.h>
+#include <lcsr_nettools/HeaderSample.h>
 #include <lcsr_nettools/TopicMeasurements.h>
 
 namespace lcsr_nettools {
@@ -27,7 +28,7 @@ namespace lcsr_nettools {
     
     //! Sample a message header
     void sample(const std_msgs::Header &header,
-                const ros::Time &time = ros::Time::now());
+                const ros::Time &recv_time = ros::Time::now());
 
     /* @} */
 
@@ -111,7 +112,7 @@ namespace lcsr_nettools {
       ros::Time recv_time;
       //! The time between the reception of the previous sample
       //and this sample.
-      double time_sep;
+      ros::Duration time_sep;
     };
 
     //! Comparator for MessageSample latencies.
@@ -121,7 +122,7 @@ namespace lcsr_nettools {
 
     //! Comparator for MessageSample frequencies.
     static bool frequency_cmp(const MessageSample& a, const MessageSample& b) {
-      return (1.0/a.time_sep) < (1.0/b.time_sep);
+      return (1.0/a.time_sep.toSec()) < (1.0/b.time_sep.toSec());
     }
 
     ros::NodeHandle nh_;

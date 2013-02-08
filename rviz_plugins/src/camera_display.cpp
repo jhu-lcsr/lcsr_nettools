@@ -658,7 +658,10 @@ void CameraDisplay::createProperties()
   setPropertyHelpText( queue_size_property_, "Advanced: set the size of the incoming message queue.  Increasing this is useful if your incoming TF data is delayed significantly from your camera data, but it can greatly increase memory usage if the messages are big." );
 
   // Statistics
-  stat_tracker_category_ = property_manager_->createCategory( "Topic Statistics", property_prefix_, parent_category_, this ); 
+  stat_tracker_category_ =
+    property_manager_->createCategory("Topic Statistics",
+                                      property_prefix_,
+                                      parent_category_, this ); 
 
   stat_tracker_enabled_property_ = 
     property_manager_->createProperty<BoolProperty>("Enabled", "Topic Statistics",

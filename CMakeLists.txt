@@ -24,9 +24,21 @@ rosbuild_genmsg()
 #common commands for building c++ executables and libraries
 rosbuild_add_library(${PROJECT_NAME} src/statistics.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
 add_subdirectory(rviz_plugins)
+
+rosbuild_add_executable(statistics_node src/statistics_node.cpp)
+target_link_libraries(statistics_node lcsr_nettools)
+
+# Statistics python wrapper
+#find_package(PythonLibs REQUIRED)
+
+#rosbuild_add_boost_directories()
+#rosbuild_add_library(statistics src/statistics_py.cpp)
+#rosbuild_link_boost(statistics python)     
+#include_directories(${PYTHON_INCLUDE_DIRS})
+#target_link_libraries(statistics lcsr_nettools ${PYTHON_LIBRARIES}) 
+#rosbuild_add_executable(header_viewer src/header_viewer.cpp)
+
