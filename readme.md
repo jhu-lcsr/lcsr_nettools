@@ -13,10 +13,26 @@ messages with ROS Headers.
 
 #### lcsr_nettools::StatisticsTracker
 
-This class
+This class is used to compute statistics for a given topic. It is intended to be used from within code which is already subscribed to a given topic, so that additional socket connections are not needed to gather information about a given data stream.
+
+It can compute the folllowing min/max/average/var over a window and for all time:
+ - Message latency
+ - Message frequency
+
+Usage of the class involves primarily two functions:
+ - `StatisticsTracker::sample(...)` Sample a header data point
+ - `StatisticsTracker::publish(...)` Publish the topic statistics on the `topic_statistics` topic.
+
+In order to record the statistics, you can use rosbag to record the messages published on the `topic_statistics` topic.
+
+See the [StatisticsTracker API](include/lcsr_nettools/statistics.h) for more information.
 
 Use from Outside of C++
 -----------------------
+
+If you don't mind making another topic connection, you can run the `statistics_node` which subscribes to the `header_samples` topic and instantiates a `StatisticsTracker`. You can publish to `header_samples` from any other kind of ROS node, and these samples will be used to compute the statistics.
+
+See [examples/tf_statistics.launch](examples/tf_statistics.launch) for a usage example with a python node wich publishes to `header_samples`. 
 
 RViz Plugins
 ------------
