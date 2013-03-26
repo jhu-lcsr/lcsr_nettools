@@ -1,0 +1,15 @@
+<launch>
+  <node pkg="tf" name="example_static_publisher" type="static_transform_publisher"
+    args="0 0 0 0 0 0 /world /robot 10"/>
+
+  <node pkg="lcsr_nettools" name="tf_statistics" type="tf_statistics.py" output="screen">
+    <param name="frame_id" value="/robot"/>
+  </node>
+
+  <node pkg="lcsr_nettools" name="statistics_node" type="statistics_node" output="screen">
+    <remap from="header_samples" to="/statistics/tf_frames/robot/header_samples"/>
+    <param name="topic_name" value="/statistics/tf_frames/robot/header_samples"/>
+    <param name="sample_buffer_duration" value="10"/>
+  </node>
+
+</launch>

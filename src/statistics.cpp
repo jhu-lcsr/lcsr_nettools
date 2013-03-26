@@ -341,11 +341,13 @@ void StatisticsTracker::publish(bool throttle, double throttle_factor) const
   static lcsr_nettools::TopicStatistics stat_msg;
 
   if(!enabled_) {
+    ROS_DEBUG("Request to publish, but StatisticsTracker is disabled.");
     return;
   }
 
   // Don't publish if we're throttling and haven't passed the throttle timestep
-  if(throttle && (ros::Time::now() - stat_msg.header.stamp) >= (sample_buffer_duration_ * throttle_factor)) {
+  if(throttle && (ros::Time::now() - stat_msg.header.stamp) < (sample_buffer_duration_ * throttle_factor)) {
+    ROS_DEBUG("Request to publish, but throttling instead.");
     return;
   }
 
