@@ -11,6 +11,13 @@ One of the main libraries in this package is `liblcsr_nettools` which provides
 an API for measuring the packet loss and min/max/avg/var latency of a topic with
 messages with ROS Headers.
 
+#### lcsr_nettools::StatisticsTracker
+
+This class
+
+Use from Outside of C++
+-----------------------
+
 RViz Plugins
 ------------
 
