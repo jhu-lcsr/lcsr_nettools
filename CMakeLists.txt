@@ -1,44 +1,28 @@
 cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+project(lcsr_nettools)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation sensor_msgs roscpp message_filters tf pluginlib rviz
+  topic_tools)
 
-rosbuild_init()
+add_message_files(FILES
+  HeaderSample.msg
+  StatisticsMeasurements.msg
+  TopicMeasurements.msg
+  TopicStatistics.msg
+  )
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+generate_messages(DEPENDENCIES std_msgs)
 
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
+catkin_package()
 
-#common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} src/statistics.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_subdirectory(rviz_plugins)
+add_library(${PROJECT_NAME} src/statistics.cpp)
 
-rosbuild_add_executable(statistics_node src/statistics_node.cpp)
-target_link_libraries(statistics_node lcsr_nettools)
+# TODO: update rviz plugin for hydro
+#add_subdirectory(rviz_plugins)
 
-# Statistics python wrapper
-#find_package(PythonLibs REQUIRED)
-
-#rosbuild_add_boost_directories()
-#rosbuild_add_library(statistics src/statistics_py.cpp)
-#rosbuild_link_boost(statistics python)     
-#include_directories(${PYTHON_INCLUDE_DIRS})
-#target_link_libraries(statistics lcsr_nettools ${PYTHON_LIBRARIES}) 
-#rosbuild_add_executable(header_viewer src/header_viewer.cpp)
+add_executable(statistics_node src/statistics_node.cpp)
+target_link_libraries(statistics_node lcsr_nettools ${catkin_LIBRARIES})
 

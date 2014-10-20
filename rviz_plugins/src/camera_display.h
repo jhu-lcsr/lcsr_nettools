@@ -34,8 +34,8 @@
 
 #include <rviz/display.h>
 #include <rviz/render_panel.h>
-#include <rviz/properties/forwards.h>
 #include <rviz/image/ros_image_texture.h>
+#include <rviz/ogre_helpers/initialization.h>
 
 #include <sensor_msgs/CameraInfo.h>
 
@@ -61,6 +61,12 @@ namespace rviz
 {
 class RenderPanel;
 class PanelDockWidget;
+class EnumProperty;
+class FloatProperty;
+class IntProperty;
+class RenderPanel;
+class RosTopicProperty;
+class DisplayGroupVisibilityProperty;
 }
 
 namespace lcsr_nettools

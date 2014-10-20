@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.4.6)
 
+find_package(Boost REQUIRED COMPONENTS thread signals filesystem system program_options)
+include_directories(${Boost_INCLUDE_DIRS})
+
 ## This plugin includes Qt widgets, so we must include Qt like so:
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 include(${QT_USE_FILE})
@@ -18,7 +21,7 @@ set(SOURCE_FILES
   ${MOC_FILES}
 )
 
-rosbuild_add_library(lcsr_nettools_rviz ${SOURCE_FILES})
-                                    
-target_link_libraries(lcsr_nettools_rviz ${PROJECT_NAME} ${QT_LIBRARIES} ${OGRE_LIBRARIES})
-rosbuild_link_boost(lcsr_nettools_rviz thread signals filesystem system program_options)
+add_library(lcsr_nettools_rviz ${SOURCE_FILES})
+
+target_link_libraries(lcsr_nettools_rviz
+  ${PROJECT_NAME} ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OGRE_LIBRARIES} ${Boost_LIBRARIES})

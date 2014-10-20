@@ -1,7 +1,7 @@
 std_msgs/Header header
 
 string topic_name
-duration recent_buffer_duration 
+duration recent_buffer_duration
 
 lcsr_nettools/TopicMeasurements recent
-lcsr_nettools/TopicMeasurements all_time 
+lcsr_nettools/TopicMeasurements all_time

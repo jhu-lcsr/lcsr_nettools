@@ -1,0 +1,27 @@
+<package format="2">
+  <name>lcsr_nettools</name>
+  <description> lcsr_nettools </description>
+  <maintainer email="jbo@jhu.edu">Jonathan Bohren</maintainer>
+  <license>BSD</license>
+  <version>0.1.0</version>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>message_generation</depend>
+  <depend>std_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>rviz</depend>
+  <depend>tf</depend>
+  <depend>sensor_msgs</depend>
+  <depend>ogre</depend>
+  <depend>message_filters</depend>
+  <depend>topic_tools</depend>
+
+  <export>
+    <!-- TODO: update rviz plugin for hydro -->
+    <!--<rviz plugin="${prefix}/rviz_plugins/plugin_description.xml"/>-->
+  </export>
+</package>
+
+
