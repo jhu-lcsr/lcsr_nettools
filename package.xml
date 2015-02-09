@@ -12,9 +12,9 @@
   <depend>std_msgs</depend>
   <depend>pluginlib</depend>
   <depend>rviz</depend>
+  <depend>libogre-dev</depend>
   <depend>tf</depend>
   <depend>sensor_msgs</depend>
-  <depend>ogre</depend>
   <depend>message_filters</depend>
   <depend>topic_tools</depend>
 
