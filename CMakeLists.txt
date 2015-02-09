@@ -19,6 +19,8 @@ catkin_package()
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} src/statistics.cpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
+
 
 # TODO: update rviz plugin for hydro
 #add_subdirectory(rviz_plugins)
